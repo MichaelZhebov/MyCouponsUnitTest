@@ -2,9 +2,10 @@ package com.main.rest;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 import org.junit.Test;
@@ -41,11 +42,32 @@ public class AdminControllerUnitTest {
 		company.setEmail("admin@admin.com");
 		company.setPassword("admin");
 		company.setFullName("Admin");
-		ResponseEntity<Company> r = new ResponseEntity<Company>(company, HttpStatus.OK);
+		ResponseEntity r = new ResponseEntity<Company>(company, HttpStatus.OK);
 		when(adminService.getOneCompany(83)).thenReturn(r);
 		ResultActions ra = null;
 		try {
-			ra = mvc.perform(get("/admin/")).andDo(print())
+			ra = mvc.perform(get("/admin/"))
+					.andExpect(status().isOk())
+					.andExpect(content().json("{\"fullName\":\"Admin\",\"email\":\"admin@admin.com\",\"password\":\"admin\"}", false));
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+		
+	@Test
+	@WithUserDetails("admin@admin.com")
+	public void test_update_admin() {
+		Company company = new Company();
+		company.setEmail("admin@admin.com");
+		company.setPassword("admin");
+		company.setFullName("Admin New");
+		ResponseEntity r = new ResponseEntity<Company>(company, HttpStatus.OK);
+		when(adminService.updateCompany(company, 83)).thenReturn(r);
+		ResultActions ra = null;
+		try {
+			ra = mvc.perform(put("/admin/")).andDo(print())
+					.andExpect(status().isOk())
 					.andExpect(content().json("{\"fullName\":\"Admin\",\"email\":\"admin@admin.com\",\"password\":\"admin\"}", false));
 
 		} catch (Exception e) {
